@@ -6,11 +6,31 @@ function getTimeString(time){
     remingSecond = remingSecond %60;
     return `${hour} hours ${minute}minute ${remingSecond} seconds`
 }
-
-function getSort(value){
+let videoViewer = [];
+const getSort =(value) =>{
     let removeK =value.split('k');
     let strToNum =parseInt(removeK[0]);
-    return strToNum;
+    videoViewer.push(strToNum)
+    videoViewer.sort((a,b) => a-b)
+    console.log(videoViewer)
+    
+}
+
+const loadSort = () =>{
+    fetch(`https://openapi.programming-hero.com/api/phero-tube/videos`)
+    .then(res => res.json())
+    .then(data => displaySort(data.videos))
+    .catch(err => console.log(err))
+}
+
+const displaySort =(videos) =>{
+    const sortBtn =document.getElementById('sorted');
+    const sortedData =videos.sort((a,b) =>{
+        const viewsA =parseFloat(a.others.views);
+        const viewsB =parseFloat(b.others.views);
+        return viewsA - viewsB
+    })
+    displayVideos(sortedData)
 }
 
 const removeActiveClass =() =>{
@@ -46,7 +66,7 @@ const loadCategoryVideos = (id) =>{
 }
 
 const loadDetails = async(videoId)=>{
-    const url='https://openapi.programming-hero.com/api/phero-tube/video/aaac';
+    const url=`https://openapi.programming-hero.com/api/phero-tube/video/${videoId}`;
     const response= await fetch(url);
     const data = await response.json();
     displayDetail(data.video)
@@ -54,7 +74,7 @@ const loadDetails = async(videoId)=>{
 const displayDetail =(video)=>{
     const detailContainer =document.getElementById('modalContent');
     detailContainer.innerHTML =`
-    <img src="${video.thumbnail}"/>
+    <img class="w-full" src="${video.thumbnail}"/>
     <p class="py-2">${video.description}</p>
     `
 
@@ -98,8 +118,6 @@ const displayVideos =(videos) =>{
     }
     videos.forEach((video) =>{
 
-        console.log(video)
-
         const card =document.createElement('div');
         card.classList='card card-compact';
         card.innerHTML=`
@@ -120,8 +138,7 @@ const displayVideos =(videos) =>{
     <p class="text-gray-400">${video.authors[0].profile_name}</p>
     ${video.authors[0].verified ===true?`<img class="w-5" src="https://img.icons8.com/?size=48&id=D9RtvkuOe31p&format=png"/>`:''}
     </div>
-    <p class="text-gray-400 font-semibold">${getSort(video.others.views)}</p>
-
+    <p></p>
     <button onclick="loadDetails('${video.video_id}')" class="btn btn-sm btn-error">details</button>
     </div>
   </div>
